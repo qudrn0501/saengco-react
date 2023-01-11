@@ -81,6 +81,7 @@ function Article(props) {
   );
 }
 
+//작성기능 컴포넌트
 function Create(props) {
   return (
     <article>
@@ -100,13 +101,58 @@ function Create(props) {
           <textarea name="body" placeholder="body"></textarea>
         </p>
         <p>
-          <input type="submit" value="create" />
+          <input type="submit" value="Create" />
         </p>
       </form>
     </article>
   );
 }
 
+//수정기능 컴포넌트
+function Update(props) {
+  const [title, setTitle] = useState(props.title);
+  const [body, setBody] = useState(props.body);
+  return (
+    <article>
+      <h2>Update</h2>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          const title = e.target.title.value;
+          const body = e.target.body.value;
+          props.onUpdate(title, body);
+        }}
+      >
+        <p>
+          <input
+            type="text"
+            name="title"
+            placeholder="title"
+            value={props.title}
+            onChange={(e) => {
+              setTitle(e.target.value);
+            }}
+          />
+        </p>
+        <p>
+          <textarea
+            name="body"
+            placeholder="body"
+            value={props.body}
+            onChange={(e) => {
+              setBody(e.target.value);
+            }}
+          ></textarea>
+        </p>
+        <p>
+          <input type="submit" value="Update" />
+        </p>
+      </form>
+    </article>
+  );
+}
+
+// ***** 앱 *****
 function App() {
   /*
   // useState의 인자는 해당 State의 초기값이다.
@@ -134,19 +180,32 @@ function App() {
     { id: 3, title: "js", body: "javascript is ..." },
   ]);
   let content = null;
+  let contextControl = null;
   if (mode === "WELCOME") {
     content = <Article title="Welcome" body="Hello, Web"></Article>;
   } else if (mode === "READ") {
     let title,
       body = null;
     for (let i = 0; i < topics.length; i++) {
-      console.log(topics[i].id, id);
       if (topics[i].id === id) {
         title = topics[i].title;
         body = topics[i].body;
       }
     }
     content = <Article title={title} body={body}></Article>;
+    contextControl = (
+      <li>
+        <a
+          href={"/update/" + id}
+          onClick={(e) => {
+            e.preventDefault();
+            setMode("UPDATE");
+          }}
+        >
+          Update
+        </a>
+      </li>
+    );
   } else if (mode === "CREATE") {
     content = (
       <Create
@@ -165,6 +224,24 @@ function App() {
           setNextId(nextId + 1); //다음에 글을 추가할 것을 대비하여
         }}
       ></Create>
+    );
+  } else if (mode === "UPDATE") {
+    let title,
+      body = null;
+    for (let i = 0; i < topics.length; i++) {
+      if (topics[i].id === id) {
+        title = topics[i].title;
+        body = topics[i].body;
+      }
+    }
+    content = (
+      <Update
+        title={title}
+        body={body}
+        onUpdate={(title, body) => {
+          console.log(title, body);
+        }}
+      ></Update>
     );
   }
 
@@ -185,15 +262,20 @@ function App() {
         }}
       ></Nav>
       {content}
-      <a
-        href="/create"
-        onClick={(e) => {
-          e.preventDefault();
-          setMode("CREATE");
-        }}
-      >
-        Create
-      </a>
+      <ul>
+        <li>
+          <a
+            href="/create"
+            onClick={(e) => {
+              e.preventDefault();
+              setMode("CREATE");
+            }}
+          >
+            Create
+          </a>
+        </li>
+        {contextControl}
+      </ul>
     </div>
   );
 }
