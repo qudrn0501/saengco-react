@@ -8,7 +8,16 @@ function Header(props) {
   return (
     <header>
       <h1>
-        <a href="/">{props.title}</a>
+        <a
+          href="/"
+          onClick={(e) => {
+            //a태그를 클릭 시 event를 다루는 함수 실행
+            e.preventDefault(); //이벤트로 발생하는 행동을 막는다.(a태그의 href 클릭으로 인해 refresh되는 것을 막음)
+            props.onChangeMode(); //앱 내 헤더 컴포넌트에서 등록한 onChangerMode prop 함수를 사용
+          }}
+        >
+          {props.title}
+        </a>
       </h1>
     </header>
   );
@@ -22,7 +31,18 @@ function Nav(props) {
     let t = props.topics[i];
     lis.push(
       <li key={t.id}>
-        <a href={"/read/" + t.id}>{t.title}</a>
+        <a
+          id={t.id}
+          href={"/read/" + t.id}
+          onClick={(e) => {
+            //파라미터가 1개인 경우 괄호 생략 가능
+            e.preventDefault();
+            props.onChangeMode(e.target.id);
+            //e.target은 이벤트를 유발시키는 태그를 타깃으로 삼는다. .id로 하여 a태그 안의 id={t.id}를 가져온다.
+          }}
+        >
+          {t.title}
+        </a>
       </li>
     );
   } //lis 배열을 열어 topics를 받을 준비를 한다.
@@ -68,8 +88,19 @@ function App() {
   ];
   return (
     <div>
-      <Header title="WEB"></Header>
-      <Nav topics={topics}></Nav>
+      <Header
+        title="WEB"
+        onChangeMode={() => {
+          //onChangeMode prop을 alert 띄우는 함수로 설정
+          alert("Header");
+        }}
+      ></Header>
+      <Nav
+        topics={topics}
+        onChangeMode={(id) => {
+          alert(id);
+        }}
+      ></Nav>
       <Article title="Welcome" body="Hello, Web"></Article>
     </div>
   );
