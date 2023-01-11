@@ -1,5 +1,6 @@
 import logo from "./logo.svg";
 import "./App.css";
+import { useState } from "react";
 
 //헤더 컴포넌트
 function Header(props) {
@@ -37,8 +38,10 @@ function Nav(props) {
           onClick={(e) => {
             //파라미터가 1개인 경우 괄호 생략 가능
             e.preventDefault();
-            props.onChangeMode(e.target.id);
+            props.onChangeMode(Number(e.target.id));
             //e.target은 이벤트를 유발시키는 태그를 타깃으로 삼는다. .id로 하여 a태그 안의 id={t.id}를 가져온다.
+            //입력한 id는 숫자지만, a태그를 통해서 들어가는 id는 문자로 변하게 된다.
+            //Number() 내장함수를 통해서 문자열로 변환한다.
           }}
         >
           {t.title}
@@ -79,6 +82,23 @@ function Article(props) {
 }
 
 function App() {
+  /*
+  // useState의 인자는 해당 State의 초기값이다.
+  //그 state의 인자값은 0번째 인덱스의 값으로 읽는다.
+  //그 state를 바꿀 때는 1번째 인덱스의 함수로 사용한다.
+
+  const _mode = useState("welcome");
+
+  //_mode를 콘솔로 찍으면 0번 원소는 welcome, 1번 원소는 f()함수가 나타난다.
+  //0번은 상태의 값을 읽을 때, 1번은 상태의 값을 변경할 때 사용한다.
+
+  console.log("_mode", _mode);
+  const mode = _mode[0]; //0번 원소에 대한 내용
+  const setMode = _mode[1]; //1번 원소에 대한 내용
+  */
+  const [mode, setMode] = useState("welcome"); //위의 3줄을 축약함
+  const [id, setId] = useState(null);
+
   // topics 상수를 배열 형태로 생성하여
   // 네비 컴포넌트에서 출력할 데이터를 형성해준다.
   const topics = [
@@ -86,22 +106,38 @@ function App() {
     { id: 2, title: "css", body: "css is ..." },
     { id: 3, title: "js", body: "javascript is ..." },
   ];
+  let content = null;
+  if (mode === "welcome") {
+    content = <Article title="Welcome" body="Hello, Web"></Article>;
+  } else if (mode === "read") {
+    let title,
+      body = null;
+    for (let i = 0; i < topics.length; i++) {
+      console.log(topics[i].id, id);
+      if (topics[i].id === id) {
+        title = topics[i].title;
+        body = topics[i].body;
+      }
+    }
+    content = <Article title={title} body={body}></Article>;
+  }
   return (
     <div>
       <Header
         title="WEB"
         onChangeMode={() => {
           //onChangeMode prop을 alert 띄우는 함수로 설정
-          alert("Header");
+          setMode("welcome");
         }}
       ></Header>
       <Nav
         topics={topics}
-        onChangeMode={(id) => {
-          alert(id);
+        onChangeMode={(_id) => {
+          setMode("read");
+          setId(_id);
         }}
       ></Nav>
-      <Article title="Welcome" body="Hello, Web"></Article>
+      {content}
     </div>
   );
 }
