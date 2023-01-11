@@ -81,6 +81,32 @@ function Article(props) {
   );
 }
 
+function Create(props) {
+  return (
+    <article>
+      <h2>Create</h2>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          const title = e.target.title.value;
+          const body = e.target.body.value;
+          props.onCreate(title, body);
+        }}
+      >
+        <p>
+          <input type="text" name="title" placeholder="title" />
+        </p>
+        <p>
+          <textarea name="body" placeholder="body"></textarea>
+        </p>
+        <p>
+          <input type="submit" value="create" />
+        </p>
+      </form>
+    </article>
+  );
+}
+
 function App() {
   /*
   // useState의 인자는 해당 State의 초기값이다.
@@ -96,20 +122,21 @@ function App() {
   const mode = _mode[0]; //0번 원소에 대한 내용
   const setMode = _mode[1]; //1번 원소에 대한 내용
   */
-  const [mode, setMode] = useState("welcome"); //위의 3줄을 축약함
+  const [mode, setMode] = useState("WELCOME"); //위의 3줄을 축약함
   const [id, setId] = useState(null);
+  const [nextId, setNextId] = useState(4);
 
   // topics 상수를 배열 형태로 생성하여
   // 네비 컴포넌트에서 출력할 데이터를 형성해준다.
-  const topics = [
+  const [topics, setTopics] = useState([
     { id: 1, title: "html", body: "html is ..." },
     { id: 2, title: "css", body: "css is ..." },
     { id: 3, title: "js", body: "javascript is ..." },
-  ];
+  ]);
   let content = null;
-  if (mode === "welcome") {
+  if (mode === "WELCOME") {
     content = <Article title="Welcome" body="Hello, Web"></Article>;
-  } else if (mode === "read") {
+  } else if (mode === "READ") {
     let title,
       body = null;
     for (let i = 0; i < topics.length; i++) {
@@ -120,24 +147,53 @@ function App() {
       }
     }
     content = <Article title={title} body={body}></Article>;
+  } else if (mode === "CREATE") {
+    content = (
+      <Create
+        onCreate={(_title, _body) => {
+          const newTopic = { id: nextId, title: _title, body: _body };
+          //상태 만들 때 상태 데이터가 원시적인 primitive(string, number, boolean)이 아닌
+          //범 객체 데이터 object(object, array)라면
+          //데이터를 복제하고, 복제한 새로운 데이터를 변경하여 set~~함수로 값을 변경해줘야 한다.
+          //배열로 만들어진 상태 데이터(객체)는 데이터를 변경 시에 원본 데이터와 일치한지, 다른지를 비교한다.
+          //객체 데이터는 새로 들어온 데이터가 같은 데이터라면 굳이 컴포넌트를 다시 렌더링하지 않는다.
+          const newTopics = [...topics]; //topics 데이터를 newTopics로 복제
+          newTopics.push(newTopic); //복제본에 push하여 복제본을 바꾼다
+          setTopics(newTopics);
+          setMode("READ"); //글의 상세 페이지로 이동
+          setId(nextId);
+          setNextId(nextId + 1); //다음에 글을 추가할 것을 대비하여
+        }}
+      ></Create>
+    );
   }
+
   return (
     <div>
       <Header
         title="WEB"
         onChangeMode={() => {
           //onChangeMode prop을 alert 띄우는 함수로 설정
-          setMode("welcome");
+          setMode("WELCOME");
         }}
       ></Header>
       <Nav
         topics={topics}
         onChangeMode={(_id) => {
-          setMode("read");
+          setMode("READ");
           setId(_id);
         }}
       ></Nav>
       {content}
+      <a
+        href="/create"
+        onClick={(e) => {
+          e.preventDefault();
+          setMode("CREATE");
+        }}
+      >
+        Create
+      </a>
     </div>
   );
 }
